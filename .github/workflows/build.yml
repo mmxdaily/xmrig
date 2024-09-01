@@ -3,6 +3,8 @@ name: build xmrig
 on:
   push:
     branches: [ "master", "ci" ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ "master" ]
 
@@ -49,12 +51,13 @@ jobs:
         name: ${{ matrix.output_archive }}
         path: ${{github.workspace}}/build/xmrig*.tar
     - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
       id: gh_release
       uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v0
+        tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
