@@ -45,5 +45,23 @@ jobs:
       with:
         name: ${{ matrix.output_archive }}
         path: ${{github.workspace}}/build/xmrig*.tar
-
+    - name: Create Release
+      id: gh_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: upload artifacts to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.gh_release.outputs.upload_url }}
+        asset_path: ${{github.workspace}}/build/${{ matrix.output_archive }}
+        asset_name: ${{ matrix.output_archive }}
+        asset_content_type: application/x-tar
 
