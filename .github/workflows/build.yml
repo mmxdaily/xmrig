@@ -59,5 +59,3 @@ jobs:
         draft: false
         prerelease: false
         files: ${{github.workspace}}/build/${{ matrix.output_archive }}
-
-
