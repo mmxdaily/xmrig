@@ -9,6 +9,9 @@ on:
 env:
   BUILD_TYPE: Release
 
+permissions:
+  contents: write
+
 jobs:
   macos:
     strategy:
@@ -47,7 +50,7 @@ jobs:
         path: ${{github.workspace}}/build/xmrig*.tar
     - name: Create Release
       id: gh_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -55,13 +58,6 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-    - name: upload artifacts to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.gh_release.outputs.upload_url }}
-        asset_path: ${{github.workspace}}/build/${{ matrix.output_archive }}
-        asset_name: ${{ matrix.output_archive }}
-        asset_content_type: application/x-tar
+        files: ${{github.workspace}}/build/${{ matrix.output_archive }}
+
 
