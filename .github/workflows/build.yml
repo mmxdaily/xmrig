@@ -22,5 +22,6 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: cmake .. -DOPENSSL_ROOT_DIR=$(brew --prefix openssl)
     - name: Build
+      working-directory: ${{github.workspace}}/build
       run: make -j$(sysctl -n hw.logicalcpu)
 
