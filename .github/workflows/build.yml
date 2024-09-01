@@ -1,0 +1,64 @@
+name: build xmrig
+
+on:
+  push:
+    branches: [ "master", "ci" ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  BUILD_TYPE: Release
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    strategy:
+      matrix:
+        os:
+          - macos-13
+          - macos-14
+        include:
+          - os: macos-13
+            output_archive: xmrig-macos-x64.tar
+          - os: macos-14
+            output_archive: xmrig-macos-arm64.tar
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Make build dirs
+      run: mkdir ${{github.workspace}}/build
+    - name: configure deps
+      run: brew install cmake libuv openssl hwloc
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}/build
+      run: cmake .. -DOPENSSL_ROOT_DIR=$(brew --prefix openssl)
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: make -j$(sysctl -n hw.logicalcpu)
+    - name: copy sample config
+      working-directory: ${{github.workspace}}/build
+      run: cp ../src/config.json ./config.json
+    - name: archive artifacts
+      working-directory: ${{github.workspace}}/build
+      run: tar -cvf ${{ matrix.output_archive }} -C ${{github.workspace}}/build/ xmrig config.json
+    - name: upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.output_archive }}
+        path: ${{github.workspace}}/build/xmrig*.tar
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      id: gh_release
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+        files: ${{github.workspace}}/build/${{ matrix.output_archive }}
