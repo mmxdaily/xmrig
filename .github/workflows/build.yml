@@ -40,7 +40,7 @@ jobs:
     - name: upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: xmrig
+        name: ${{ matrix.output_archive }}
         path: ${{github.workspace}}/build/xmrig*.tar
 
 
