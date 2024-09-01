@@ -24,4 +24,10 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       run: make -j$(sysctl -n hw.logicalcpu)
+    - name: upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: xmrig
+        path: ${{github.workspace}}/build/xmrig
+
 
